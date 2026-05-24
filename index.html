@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insurance Risk & Claims Analysis — Power BI Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1F3A;
+    --navy-mid: #132840;
+    --accent: #00C9A7;
+    --accent2: #FF6B6B;
+    --accent3: #FFD166;
+    --muted: #8BA3C0;
+    --surface: #0F2744;
+    --surface2: #163354;
+    --border: rgba(0,201,167,0.15);
+    --text: #E8F0FB;
+    --text-secondary: #8BA3C0;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,201,167,0.08) 0%, transparent 70%);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(0,201,167,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(255,107,107,0.04) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,201,167,0.1);
+    border: 1px solid rgba(0,201,167,0.3);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 900px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-primary { background: var(--accent); color: #0B1F3A; }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(0,201,167,0.4);
+    color: var(--accent);
+  }
+  .btn:hover { transform: translateY(-2px); }
+
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-item {
+    padding: 2rem 3rem;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  section {
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-tag {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .lead {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin-bottom: 3rem;
+    font-weight: 300;
+  }
+
+  .objective-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .obj-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+
+  .obj-card:hover {
+    border-color: rgba(0,201,167,0.4);
+    transform: translateY(-4px);
+  }
+
+  .obj-card::before {
+    content: attr(data-num);
+    position: absolute;
+    top: -10px; right: 1rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 6rem;
+    font-weight: 800;
+    color: rgba(0,201,167,0.05);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .obj-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .obj-card p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .data-table thead th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 14px 20px;
+    text-align: left;
+  }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid rgba(139,163,192,0.08);
+    transition: background 0.15s;
+  }
+
+  .data-table tbody tr:hover { background: rgba(0,201,167,0.04); }
+
+  .data-table td {
+    padding: 12px 20px;
+    vertical-align: top;
+  }
+
+  .data-table td:first-child {
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    font-size: 13px;
+  }
+
+  .data-table td code {
+    background: rgba(0,201,167,0.1);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .data-table td:last-child {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .tool-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .tool-pill:hover { border-color: rgba(0,201,167,0.5); transform: translateY(-2px); }
+
+  .tool-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+  }
+
+  .tool-pill h4 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .tool-pill p { font-size: 12px; color: var(--text-secondary); }
+
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .insight-card:hover { transform: translateY(-4px); border-color: rgba(0,201,167,0.35); }
+
+  .insight-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  .insight-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .insight-card ul { list-style: none; }
+
+  .insight-card li {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(139,163,192,0.08);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+
+  .insight-card li:last-child { border-bottom: none; }
+  .insight-card li .num { color: var(--accent); font-weight: 600; white-space: nowrap; }
+
+  .steps { position: relative; padding-left: 2.5rem; }
+
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 15px; top: 12px; bottom: 12px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), rgba(0,201,167,0.1));
+  }
+
+  .step { position: relative; margin-bottom: 2.5rem; padding-left: 1rem; }
+
+  .step::before {
+    content: attr(data-n);
+    position: absolute;
+    left: -2.5rem; top: 0;
+    width: 30px; height: 30px;
+    background: var(--accent);
+    color: var(--navy);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .step p { font-size: 0.92rem; color: var(--text-secondary); }
+
+  .achieve-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .achieve-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .achieve-item:hover { border-color: rgba(0,201,167,0.4); transform: translateY(-2px); }
+
+  .achieve-check {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: rgba(0,201,167,0.15);
+    border: 1px solid rgba(0,201,167,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .achieve-item h4 { font-size: 0.92rem; font-weight: 500; margin-bottom: 4px; }
+  .achieve-item p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+
+  .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.5rem; }
+
+  .tech-tag {
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid;
+  }
+
+  .tech-tag.a { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.3); color: var(--accent); }
+  .tech-tag.b { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.3); color: var(--accent2); }
+  .tech-tag.c { background: rgba(255,209,102,0.08); border-color: rgba(255,209,102,0.3); color: var(--accent3); }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  .chart-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+
+  .chart-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .bar-name { font-size: 13px; color: var(--text-secondary); min-width: 90px; text-align: right; white-space: nowrap; }
+  .bar-track { flex: 1; height: 22px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; font-weight: 600; color: #0B1F3A; }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,31,58,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 64px;
+  }
+
+  .nav-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nav-links { display: flex; gap: 2rem; }
+
+  .nav-links a {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .stat-item { min-width: 140px; padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-brand">🛡️ Insurance Risk Analysis</a>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#dataset">Dataset</a>
+    <a href="#insights">Insights</a>
+    <a href="#achieved">Achievements</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="badge">Power BI End-to-End Project</div>
+  <h1>Insurance Risk &<br><span>Claims Analysis</span></h1>
+  <p class="hero-sub">A centralized, interactive Power BI dashboard transforming scattered insurance data into actionable business intelligence across 37,542 policies and $187.8M in claims.</p>
+  <div class="hero-cta">
+    <a href="Insurance_risk_and_claims_analysis.pbix" class="btn btn-primary">⬇ Download .pbix File</a>
+    <a href="#overview" class="btn btn-secondary">Explore Project ↓</a>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-num">37,542</span>
+    <span class="stat-label">Total Policies</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">$187.8M</span>
+    <span class="stat-label">Total Claim Amount</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">$5.0K</span>
+    <span class="stat-label">Avg Claim Amount</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">16</span>
+    <span class="stat-label">Data Columns</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">8</span>
+    <span class="stat-label">Visualizations</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<section id="overview">
+  <span class="section-tag">Project Overview</span>
+  <h2>What is this project?</h2>
+  <p class="lead">This project delivers a fully interactive Power BI dashboard for an insurance company to understand its policyholder base, claim patterns, and risk exposure — all from a single, centralized view.</p>
+
+  <div class="objective-grid">
+    <div class="obj-card" data-num="1">
+      <h3>🎯 Business Problem</h3>
+      <p>Policy and claims data were scattered across multiple sources, making it nearly impossible for stakeholders to track performance or identify trends efficiently.</p>
+    </div>
+    <div class="obj-card" data-num="2">
+      <h3>💡 The Solution</h3>
+      <p>A centralized Power BI dashboard with dual-view toggle (Claim Amount / Total Policies), 5 KPI cards, and 8 dynamic charts — all cross-filtering in real time.</p>
+    </div>
+    <div class="obj-card" data-num="3">
+      <h3>📊 The Impact</h3>
+      <p>Stakeholders can now identify high-risk segments, track geographic exposure, and profile customers by demographics — all in a single click.</p>
+    </div>
+    <div class="obj-card" data-num="4">
+      <h3>⚙️ The Architecture</h3>
+      <p>Power Query for data transformation, DAX for calculated measures, and Field Parameters for the dynamic dual-view — a production-ready, scalable BI solution.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="dataset">
+  <span class="section-tag">Dataset Description</span>
+  <h2>The data powering it all</h2>
+  <p class="lead">Single flat-file Excel dataset with 37,542 records and 16 columns — covering policyholder demographics, vehicle details, geographic zones, and claim metrics.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Column</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>ID</code></td><td>Unique policyholder identifier</td></tr>
+      <tr><td><code>BirthDate</code></td><td>Date of birth — used to derive Age Group buckets (15-25 through 66-75)</td></tr>
+      <tr><td><code>Car Make</code></td><td>Vehicle manufacturer — Ford, Chevrolet, Toyota, GMC, Dodge, and more</td></tr>
+      <tr><td><code>Car Model</code></td><td>Specific vehicle model name</td></tr>
+      <tr><td><code>Car Use</code></td><td>Usage category — Private or Commercial</td></tr>
+      <tr><td><code>Car Year</code></td><td>Year of vehicle manufacture (1990–2020)</td></tr>
+      <tr><td><code>Coverage Zone</code></td><td>Geographic zone — Urban, Suburban, Rural, Highly Urban, Highly Rural</td></tr>
+      <tr><td><code>Education</code></td><td>Education level — High School, Bachelors, Masters, PhD</td></tr>
+      <tr><td><code>Gender</code></td><td>Male or Female (near-equal split: 18.8K / 18.7K)</td></tr>
+      <tr><td><code>Marital Status</code></td><td>Divorced, Married, Separated, Single</td></tr>
+      <tr><td><code>Parent</code></td><td>Whether the policyholder is a parent (Yes / No)</td></tr>
+      <tr><td><code>Kids Driving</code></td><td>Number of household members under 18 who drive</td></tr>
+      <tr><td><code>Claim Amount</code></td><td>Dollar value of the insurance claim filed per policy</td></tr>
+      <tr><td><code>Claim Freq</code></td><td>Number of claims filed — average is 0.5 across all policies</td></tr>
+      <tr><td><code>Household Income</code></td><td>Annual gross household income of the policyholder</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="divider"></div>
+
+<section id="tools">
+  <span class="section-tag">Tools & Skills Used</span>
+  <h2>Technology Stack</h2>
+  <p class="lead">End-to-end Power BI development — from raw data ingestion through dashboard design and stakeholder-ready reporting.</p>
+
+  <div class="tools-grid">
+    <div class="tool-pill">
+      <div class="tool-icon" style="background:rgba(242,200,17,0.12);">📊</div>
+      <div><h4>Power BI Desktop</h4><p>Core BI development platform</p></div>
+    </div>
+    <div class="tool-pill">
+      <div class="tool-icon" style="background:rgba(33,115,70,0.12);">📁</div>
+      <div><h4>Microsoft Excel</h4><p>Source data (.xlsx format)</p></div>
+    </div>
+    <div class="tool-pill">
+      <div class="tool-icon" style="background:rgba(0,120,212,0.12);">🧮</div>
+      <div><h4>DAX</h4><p>Calculated measures & KPIs</p></div>
+    </div>
+    <div class="tool-pill">
+      <div class="tool-icon" style="background:rgba(0,201,167,0.12);">⚡</div>
+      <div><h4>Power Query (M)</h4><p>Data cleaning & transformation</p></div>
+    </div>
+    <div class="tool-pill">
+      <div class="tool-icon" style="background:rgba(255,107,107,0.12);">🔀</div>
+      <div><h4>Field Parameters</h4><p>Dynamic dual-view toggle</p></div>
+    </div>
+    <div class="tool-pill">
+      <div class="tool-icon" style="background:rgba(255,209,102,0.12);">🎨</div>
+      <div><h4>Data Modeling</h4><p>Flat table with star concepts</p></div>
+    </div>
+  </div>
+
+  <div class="tech-tags">
+    <span class="tech-tag a">Donut Chart</span>
+    <span class="tech-tag a">Bar Chart</span>
+    <span class="tech-tag a">Histogram</span>
+    <span class="tech-tag a">Area Chart</span>
+    <span class="tech-tag a">Ribbon Chart</span>
+    <span class="tech-tag b">Pie Chart</span>
+    <span class="tech-tag b">Matrix Heat Grid</span>
+    <span class="tech-tag c">KPI Cards</span>
+    <span class="tech-tag c">Cross-filtering</span>
+    <span class="tech-tag c">Dynamic Measures</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="what-we-did">
+  <span class="section-tag">What We Did</span>
+  <h2>End-to-End Build Process</h2>
+  <p class="lead">From raw spreadsheet to interactive executive dashboard — here's how the project was built, step by step.</p>
+
+  <div class="steps">
+    <div class="step" data-n="1">
+      <h3>Data Ingestion & Power Query Transformation</h3>
+      <p>Loaded raw Excel dataset into Power BI. Cleaned inconsistent BirthDate formats, created Age Group bins (15-25 through 66-75), corrected data types across all 16 columns, and handled null values in Claim Freq and Kids Driving.</p>
+    </div>
+    <div class="step" data-n="2">
+      <h3>Data Modeling</h3>
+      <p>Built a clean flat-table model with proper data types enabling correct aggregation. Configured filter propagation and relationship settings to support all planned cross-filtering interactions.</p>
+    </div>
+    <div class="step" data-n="3">
+      <h3>DAX Measure Development</h3>
+      <p>Created all 5 core KPI measures explicitly in DAX — Total Claim Amount (SUM), Total Policies (COUNTROWS), Average Claim Amount (AVERAGE), Claim Frequency (AVERAGE), and Gender-wise splits using CALCULATE with FILTER.</p>
+    </div>
+    <div class="step" data-n="4">
+      <h3>Dynamic Dual-View via Field Parameters</h3>
+      <p>Implemented Power BI Field Parameters to create a single toggle button that switches all 8 chart Y-axes between Total Claim Amount and Total Policies simultaneously — no duplicate pages required.</p>
+    </div>
+    <div class="step" data-n="5">
+      <h3>Dashboard Design & Layout</h3>
+      <p>Designed an 8-chart layout across two toggle views: Donut (Car Use, Coverage Zone), Bar (Car Make), Histogram (Age Group), Area (Car Year), Ribbon (Kids Driving), Pie (Education), and Matrix Heat Grid (Education × Marital Status). KPI cards in a dedicated left panel with a consistent color theme.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="insights">
+  <span class="section-tag">Key Insights</span>
+  <h2>What the data revealed</h2>
+  <p class="lead">Patterns, anomalies, and risk signals discovered through the dashboard.</p>
+
+  <div class="chart-preview">
+    <div class="chart-label">Total Claim Amount by Car Make</div>
+    <div class="bar-row"><span class="bar-name">Ford</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--accent);">$17M</div></div></div>
+    <div class="bar-row"><span class="bar-name">Chevrolet</span><div class="bar-track"><div class="bar-fill" style="width:88%;background:var(--accent);">$15M</div></div></div>
+    <div class="bar-row"><span class="bar-name">Dodge</span><div class="bar-track"><div class="bar-fill" style="width:53%;background:#4ECDC4;">$9M</div></div></div>
+    <div class="bar-row"><span class="bar-name">Toyota</span><div class="bar-track"><div class="bar-fill" style="width:53%;background:#4ECDC4;">$9M</div></div></div>
+    <div class="bar-row"><span class="bar-name">GMC</span><div class="bar-track"><div class="bar-fill" style="width:53%;background:#4ECDC4;">$9M</div></div></div>
+    <div class="bar-row"><span class="bar-name">Mitsubishi</span><div class="bar-track"><div class="bar-fill" style="width:41%;background:#8BA3C0;">$7M</div></div></div>
+    <div class="bar-row"><span class="bar-name">Mazda</span><div class="bar-track"><div class="bar-fill" style="width:41%;background:#8BA3C0;">$7M</div></div></div>
+  </div>
+
+  <div class="insights-grid" style="margin-top:2rem;">
+    <div class="insight-card">
+      <h3><span class="insight-dot" style="background:var(--accent);"></span>Vehicle Risk</h3>
+      <ul>
+        <li><span class="num">$150.4M</span> from private vehicles (80% of all claims)</li>
+        <li><span class="num">Ford</span> is highest-risk brand at $17M total</li>
+        <li>Claims peak for vehicles manufactured <span class="num">2000–2018</span></li>
+        <li>Commercial vehicles account for only <span class="num">$37.4M</span></li>
+      </ul>
+    </div>
+    <div class="insight-card">
+      <h3><span class="insight-dot" style="background:var(--accent2);"></span>Demographics</h3>
+      <ul>
+        <li>Age group <span class="num">46–55</span> has highest claims ($36M) and policies (7.1K)</li>
+        <li><span class="num">15–25</span> bracket has lowest volume but higher per-policy risk</li>
+        <li>Near-equal gender split: <span class="num">18.8K</span> female vs 18.7K male</li>
+        <li>Bachelors holders: <span class="num">19K policies</span>, $94M in claims</li>
+      </ul>
+    </div>
+    <div class="insight-card">
+      <h3><span class="insight-dot" style="background:var(--accent3);"></span>Geography</h3>
+      <ul>
+        <li>All 5 zones remarkably even at <span class="num">~$37–38M</span> each</li>
+        <li>Urban leads at <span class="num">$38.23M</span>; Highly Rural lowest at $37.26M</li>
+        <li>Zone is not a strong differentiator for claim severity</li>
+        <li>Policy distribution mirrors claim distribution geographically</li>
+      </ul>
+    </div>
+    <div class="insight-card">
+      <h3><span class="insight-dot" style="background:#A78BFA;"></span>Education × Marital</h3>
+      <ul>
+        <li><span class="num">Single + High School</span> highest segment: $40.2M</li>
+        <li>Single + Bachelors close second at <span class="num">$38.7M</span></li>
+        <li>Married policyholders show stable, moderate behavior</li>
+        <li>PhD holders lowest risk across all statuses: <span class="num">$13.69M</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="achieved">
+  <span class="section-tag">What We Achieved</span>
+  <h2>Business Outcomes Delivered</h2>
+  <p class="lead">Concrete, measurable outcomes delivered by this dashboard to the business.</p>
+
+  <div class="achieve-grid">
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>Centralized Reporting</h4>
+        <p>Replaced fragmented multi-source data with a single Power BI dashboard as the source of truth.</p>
+      </div>
+    </div>
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>Dynamic Dual-View</h4>
+        <p>One dashboard delivers both claim amount AND policy volume via a toggle — no duplicate reports.</p>
+      </div>
+    </div>
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>8 Interactive Charts</h4>
+        <p>All visuals respond to cross-filtering — drill into any segment, brand, or demographic instantly.</p>
+      </div>
+    </div>
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>Risk Profiling</h4>
+        <p>Identified highest-risk segments: Ford vehicles, 46–55 age group, Single High School policyholders.</p>
+      </div>
+    </div>
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>30-Year Trend Analysis</h4>
+        <p>Revealed claim growth patterns from 1990–2020 by vehicle manufacture year via area chart.</p>
+      </div>
+    </div>
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>Executive KPIs</h4>
+        <p>5 headline KPI cards give leadership an instant pulse on policies, claims, frequency, and amounts.</p>
+      </div>
+    </div>
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>Scalable Architecture</h4>
+        <p>Power Query + DAX design means the dashboard auto-refreshes when new data is loaded.</p>
+      </div>
+    </div>
+    <div class="achieve-item">
+      <div class="achieve-check">✓</div>
+      <div>
+        <h4>Demographic Segmentation</h4>
+        <p>Education × Marital Status heat grid enables targeted policy pricing and marketing decisions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Built with ❤️ using <strong>Power BI Desktop</strong>, <strong>DAX</strong>, and <strong>Power Query</strong></p>
+  <p style="margin-top:8px;">Insurance Risk & Claims Analysis — End-to-End Portfolio Project</p>
+  <p style="margin-top:1rem;">
+    <a href="Insurance_risk_and_claims_analysis.pbix">⬇ Download .pbix</a>
+    &nbsp;|&nbsp;
+    <a href="insurance_policy_date.xlsx">⬇ Download Dataset</a>
+  </p>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('section, .stats-bar');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => { el.classList.add('reveal'); observer.observe(el); });
+</script>
+
+</body>
+</html>
